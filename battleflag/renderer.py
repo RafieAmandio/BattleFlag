@@ -18,9 +18,10 @@ from config import (
 )
 
 
-def render_frame(frame_data, title="Pertarungan Lingkaran"):
+def render_frame(frame_data, title="Pertarungan Lingkaran", background_color=None):
     """Render a single frame as a PIL Image."""
-    img = Image.new("RGB", (VIDEO_WIDTH, VIDEO_HEIGHT), BACKGROUND_COLOR)
+    bg = background_color if background_color else BACKGROUND_COLOR
+    img = Image.new("RGB", (VIDEO_WIDTH, VIDEO_HEIGHT), bg)
     draw = ImageDraw.Draw(img)
 
     # Title text
@@ -71,18 +72,23 @@ def render_frame(frame_data, title="Pertarungan Lingkaran"):
     return img
 
 
-def render_video(frames, output_name="battle", title="Pertarungan Lingkaran"):
+def render_video(frames, output_name="battle", title="Pertarungan Lingkaran",
+                  output_dir=None, background_color=None):
     """Render all frames into an MP4 video."""
-    from moviepy.editor import ImageSequenceClip
+    try:
+        from moviepy.editor import ImageSequenceClip
+    except ImportError:
+        from moviepy import ImageSequenceClip
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    target_dir = output_dir if output_dir else OUTPUT_DIR
+    os.makedirs(target_dir, exist_ok=True)
 
     rendered_frames = []
     for frame_data in frames:
-        img = render_frame(frame_data, title=title)
+        img = render_frame(frame_data, title=title, background_color=background_color)
         rendered_frames.append(np.array(img))
 
     clip = ImageSequenceClip(rendered_frames, fps=FPS)
-    output_path = os.path.join(OUTPUT_DIR, f"{output_name}.{OUTPUT_FORMAT}")
+    output_path = os.path.join(target_dir, f"{output_name}.{OUTPUT_FORMAT}")
     clip.write_videofile(output_path, codec="libx264", audio=False)
     return output_path

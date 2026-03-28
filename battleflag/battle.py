@@ -27,10 +27,16 @@ TEAMS = [
 ]
 
 
-def create_battle(num_circles=10):
-    """Create a new battle with randomized circles."""
+def create_battle(num_circles=10, teams=None):
+    """Create a new battle with randomized circles.
+
+    If teams is provided, use those instead of the default TEAMS list.
+    """
     circles = []
-    teams = random.sample(TEAMS, min(num_circles, len(TEAMS)))
+    if teams is None:
+        teams = random.sample(TEAMS, min(num_circles, len(TEAMS)))
+    else:
+        teams = teams[:num_circles]
 
     for team in teams:
         x = random.randint(100, VIDEO_WIDTH - 100)
@@ -66,9 +72,9 @@ def simulate_frame(circles):
     return circles
 
 
-def run_battle(num_circles=10):
+def run_battle(num_circles=10, teams=None):
     """Run a full battle simulation, returning frame data."""
-    circles = create_battle(num_circles)
+    circles = create_battle(num_circles, teams=teams)
     total_frames = FPS * BATTLE_DURATION_SEC
     frames = []
 
